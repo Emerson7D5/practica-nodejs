@@ -83,8 +83,8 @@ export const deleteUser = async (id_usuario) => {
     // Verificamos si el usuario existe
     const usuarioAEliminar = await pool.query('SELECT * FROM doc.usuarios WHERE id_usuario=$1', [id_usuario]);
 
-    // Si no existe, lanzamos un error
-    if (usuarioAEliminar.rowCount === 0) throw new Error('Usuario no encontrado', 404);
+    // Si no existe, lanzamos un error  
+    if (usuarioAEliminar.rowCount === 0) throw new Error('Usuario no encontrado');
 
     // Si existe, ejecutamos la sentencia DELETE
     const result = await pool.query('DELETE FROM doc.usuarios WHERE id_usuario=$1', [id_usuario]);

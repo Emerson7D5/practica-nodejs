@@ -4,6 +4,9 @@ import { Router } from 'express';
 // Importamos los controladores que manejan la lógica de cada ruta
 import * as userController from '../controllers/usersController.js';
 
+// Importamos nuestras validaciones y el runner que las ejecuta
+import { createUserValidators,updateUserValidators, runValidations } from '../middlewares/validators.js';
+
 // Creamos una instancia de Router
 const router = Router();
 
@@ -16,11 +19,13 @@ router.get('/buscarPorEmail/:email', userController.getObtenerPorEmail);
 // Ruta para buscar usuarios por nombre (GET /users/buscarPorNombre/:nombre)
 router.get('/buscarPorNombre/:nombre', userController.getBuscarNombre);
 
-// Ruta para crear un nuevo usuario (POST /users)
-router.post('/', userController.postCrearUsuario);
+//  Ruta para crear un nuevo usuario (POST /users)
+//    - Primero ejecutamos runValidations(createUserValidators)
+//    - Si pasa la validación, entra a userController.postCrearUsuario
+router.post('/', runValidations(createUserValidators), userController.postCrearUsuario);
 
 // Ruta para actualizar un usuario existente (PUT /users/:id_usuario)
-router.put('/:id_usuario', userController.putActualizarUsuario);
+router.put('/:id_usuario', runValidations(updateUserValidators), userController.putActualizarUsuario);
 
 // Ruta para eliminar un usuario (DELETE /users/:id_usuario)
 router.delete('/:id_usuario', userController.deleteEliminarUsuario);
