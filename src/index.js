@@ -4,6 +4,9 @@ import express from 'express';
 // Importamos nuestro router de usuarios
 import usersRouter from './routes/users.js';
 
+// Importamos el middleware de manejo de errores
+import { errorHandler } from './middlewares/errorHandler.js';
+
 // Importamos las variables de entorno desde el archivo .env
 import dotenv from 'dotenv';
 dotenv.config();
@@ -21,6 +24,9 @@ app.get('/', (req, res) => {
 
 // Asociamos todas las rutas de usuarios al prefijo "/users"
 app.use('/users', usersRouter);
+
+// Middleware de errores → SIEMPRE va al final de todas las rutas
+app.use(errorHandler);
 
 // Iniciamos el servidor en el puerto definido en la variable de entorno 
 // o de lo contrario usamos el puerto 3000

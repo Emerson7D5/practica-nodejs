@@ -4,38 +4,27 @@ import { pool } from '../db.js';
 // =========================================
 // Obtener todos los usuarios
 // =========================================
-export const getAllUsers = async (req, res) => {
-  try {
+export const getAllUsers = async () => { 
     // Ejecutamos consulta SQL
     const result = await pool.query('SELECT * FROM doc.usuarios');
-    // Devolvemos los resultados en formato JSON
-    res.json(result.rows);
-  } catch (err) {
-    // Si ocurre un error, devolvemos el mensaje de error
-    res.status(500).json({ error: err.message });
-  }
+    // Devolvemos los resultados
+    return result.rows; 
 };
 
 // =========================================
 // Buscar usuario por email
 // =========================================
-export const getUserByEmail = async (req, res) => {
-  // Extraemos el email de los parámetros de la URL
-  const { email } = req.params;
-  try {
+export const getUserByEmail = async (email) => {  
     // Ejecutamos consulta SQL con parámetro dinámico ($1)
     const result = await pool.query('SELECT * FROM doc.usuarios WHERE email = $1', [email]);
     // Retornamos el resultado
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    return result.rows; 
 };
 
 // =========================================
 // Buscar usuario por nombre
 // =========================================
-export const getBuscarNombre = async (nombre) => {
+export const getByName = async (nombre) => {
     // Construimos el patrón de búsqueda con porcentajes para el LIKE
     const buscar = `%${nombre}%`
     // Ejecutamos consulta SQL con parámetro dinámico ($1)
@@ -49,8 +38,7 @@ export const getBuscarNombre = async (nombre) => {
 // =========================================
 // Crear un nuevo usuario
 // =========================================
-export const postCrearUsuario = async (nombre, documento, carnet,email, contrasenia) => {
-  try {
+export const createUser = async (nombre, documento, carnet,email, contrasenia) => { 
     // Definimos la consulta SQL con parámetros
     const query = `INSERT INTO doc.usuarios 
              (nombre, documento, carnet, email, contrasenia, bloqueado, ultimo_login, activo) 
@@ -61,17 +49,13 @@ export const postCrearUsuario = async (nombre, documento, carnet,email, contrase
 
     // Retornamos el nuevo usuario creado
     return result.rows[0];
-
-  } catch (err) {
-    // Si ocurre error, lo lanzamos para que lo capture el controlador
-    throw err;
-  }
+ 
 };
 
 // =========================================
 // Actualizar usuario
 // =========================================
-export const actualizarUsuario = async (usuario) => {
+export const updateUser = async (usuario) => {
   // Definimos la consulta SQL con parámetros
   const query = `UPDATE doc.usuarios 
                 SET nombre=$1, 
@@ -95,22 +79,18 @@ export const actualizarUsuario = async (usuario) => {
 // =========================================
 // Eliminar usuario
 // =========================================
-export const eliminarUsuario = async (id_usuario) => {
-  try {
+export const deleteUser = async (id_usuario) => { 
     // Verificamos si el usuario existe
     const usuarioAEliminar = await pool.query('SELECT * FROM doc.usuarios WHERE id_usuario=$1', [id_usuario]);
 
     // Si no existe, lanzamos un error
-    if (usuarioAEliminar.rowCount === 0) throw new Error('Usuario no encontrado');
+    if (usuarioAEliminar.rowCount === 0) throw new Error('Usuario no encontrado', 404);
 
     // Si existe, ejecutamos la sentencia DELETE
     const result = await pool.query('DELETE FROM doc.usuarios WHERE id_usuario=$1', [id_usuario]);
 
     // Confirmamos la eliminación
-    return { message: 'Usuario eliminado correctamente', usuario: usuarioAEliminar.rows[0] };    
-  } catch (err) {
-    return { error: err.message };
-  }
+    return { message: 'Usuario eliminado correctamente', usuario: usuarioAEliminar.rows[0] };     
 };
 
 
