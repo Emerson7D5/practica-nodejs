@@ -64,10 +64,11 @@ export const createUserValidators = [
     // Validación asíncrona: comprobar en BD que el email no exista
     .custom(async (value) => {
       // Llamamos al servicio que busca por email
+    //   console.log("Validando email:", value);
       const user = await userService.getUserByEmail(value);
 
       // Si existe un usuario con ese email, rechazamos la validación
-      if (user) {
+      if (user.length > 0) {
         // Rechazamos con un mensaje; express-validator convertirá esto en un error
         return Promise.reject('El email ya está registrado');
       }

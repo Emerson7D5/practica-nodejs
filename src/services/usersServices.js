@@ -1,6 +1,9 @@
 // Importamos nuestro pool de conexiones a la BD
 import { pool } from '../db.js';
 
+// Importamos bcryptjs para generar hashes y comparar contraseñas
+import bcrypt from 'bcryptjs';
+
 // =========================================
 // Obtener todos los usuarios
 // =========================================
@@ -17,6 +20,7 @@ export const getAllUsers = async () => {
 export const getUserByEmail = async (email) => {  
     // Ejecutamos consulta SQL con parámetro dinámico ($1)
     const result = await pool.query('SELECT * FROM doc.usuarios WHERE email = $1', [email]);
+    console.log(result.rows);
     // Retornamos el resultado
     return result.rows; 
 };
@@ -39,13 +43,22 @@ export const getByName = async (nombre) => {
 // Crear un nuevo usuario
 // =========================================
 export const createUser = async (nombre, documento, carnet,email, contrasenia) => { 
+    // Número de salt rounds (cost). 10 es un valor razonable para desarrollo.
+    const SALT_ROUNDS = 10;
+
+    // Generamos el salt de bcrypt (hash salado internamente)
+    // bcrypt.genSaltSync devuelve el salt de forma síncrona
+    const salt = bcrypt.genSaltSync(SALT_ROUNDS);
+
+    // Generamos el hash a partir de la contraseña y el salt
+    const contraseniaHashed = bcrypt.hashSync(contrasenia, salt); 
     // Definimos la consulta SQL con parámetros
     const query = `INSERT INTO doc.usuarios 
              (nombre, documento, carnet, email, contrasenia, bloqueado, ultimo_login, activo) 
       VALUES ($1, $2, $3, $4, $5, 'N', null, 'A') RETURNING *;`
 
     // Ejecutamos la consulta de inserción con parámetros seguros
-    const result = await pool.query(query, [nombre, documento, carnet, email, contrasenia]);
+    const result = await pool.query(query, [nombre, documento, carnet, email, contraseniaHashed]);
 
     // Retornamos el nuevo usuario creado
     return result.rows[0];
